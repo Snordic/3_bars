@@ -56,6 +56,15 @@ def bar_name(data_bar):
         return None
 
 
+def get_names_bars(info_bars):
+    name_biggest_bar = bar_name(get_biggest_bar(info_bars))
+    name_smallest_bar = bar_name(get_smallest_bar(info_bars))
+    name_closest_bar = bar_name(get_closest_bar(info_bars))
+    if not name_closest_bar:
+        name_closest_bar = 'Бар не найден из-за ошибки ввода координат!'
+    return name_biggest_bar, name_smallest_bar, name_closest_bar
+
+
 def print_search_bar(biggest_bar, smallest_bar, closest_bar):
     print('{} {}'.format('Самый большой бар:', biggest_bar))
     print('{} {}'.format('Самый маленький бар:', smallest_bar))
@@ -64,8 +73,7 @@ def print_search_bar(biggest_bar, smallest_bar, closest_bar):
 
 if __name__ == '__main__':
     try:
-       # filename = sys.argv[1]
-        filename = 'bars.json'
+        filename = sys.argv[1]
         data_from_json_file = load_data(filename)
         info_bars = data_from_json_file['features']
     except IndexError:
@@ -75,9 +83,4 @@ if __name__ == '__main__':
     except json.decoder.JSONDecodeError:
         print('Ошибка: Расширение файла не JSON!')
     else:
-        name_biggest_bar = bar_name(get_biggest_bar(info_bars))
-        name_smallest_bar = bar_name(get_smallest_bar(info_bars))
-        name_closest_bar = bar_name(get_closest_bar(info_bars))
-        if not name_closest_bar:
-            name_closest_bar = 'Бар не найден из-за ошибки ввода координат!'
-        print_search_bar(name_biggest_bar, name_smallest_bar, name_closest_bar)
+        print_search_bar(*get_names_bars(info_bars))
