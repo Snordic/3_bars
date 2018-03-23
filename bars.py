@@ -1,6 +1,7 @@
 import json
 from math import sqrt
 import sys
+import operator
 
 
 def input_user_coordinate():
@@ -16,67 +17,43 @@ def input_user_coordinate():
 
 
 def load_data(filepath):
-    try:
-        with open(filepath, 'r', encoding='utf-8') as file_with_json:
-            data_from_file = json.load(file_with_json)
-    except FileNotFoundError:
-        print('Ошибка: Данный файл не существует!')
-        return None
-    except json.decoder.JSONDecodeError:
-        print('Ошибка: Расширение файла не JSON!')
-        return None
-    else:
-        return data_from_file['features']
+    with open(filepath, 'r', encoding='utf-8') as file_with_json:
+        return json.load(file_with_json)
 
 
-def get_biggest_bar(data_from_file):
-    biggest_bar = max(data_from_file,
-                      key=lambda x: x['properties']['Attributes']['SeatsCount'])
-    return biggest_bar
+def take_seat_count_bar(data_bar):
+    return data_bar['properties']['Attributes']['SeatsCount']
 
 
-def get_smallest_bar(data_from_file):
-    smallest_bar = min(data_from_file,
-                       key=lambda x: x['properties']['Attributes']['SeatsCount'])
-    return smallest_bar
+def get_biggest_bar(information_bar):
+    return max(information_bar,key=lambda x: (take_seat_count_bar(x)))
 
 
-def get_closest_bar(data_from_file):
+def get_smallest_bar(information_bar):
+    return min(information_bar, key=lambda x: (take_seat_count_bar(x)))
+
+
+def get_closest_bar(information_bar):
     longitude, latitude = input_user_coordinate()
     if longitude and latitude:
-        closest_bar = min(data_from_file,
-                          key=lambda x: (calculate_distance(
-                              longitude,
-                              latitude,
-                              *x['geometry']['coordinates']))
-                          )
-        return closest_bar
+        return min(information_bar, key=lambda x: (calculate_distance(
+            longitude,
+            latitude,
+            *x['geometry']['coordinates']))
+                   )
     else:
         return None
 
 
 def calculate_distance(x_coord_1, y_coord_1, x_coord_2, y_coord_2):
-    distance_bar = sqrt(
-        (x_coord_1-x_coord_2)**2 + (y_coord_1-y_coord_2)**2
-    )
-    return distance_bar
+    return sqrt((x_coord_1-x_coord_2)**2 + (y_coord_1-y_coord_2)**2)
 
 
-def search_name_bar(filename):
-    data_from_json_file = load_data(filename)
-    if data_from_json_file:
-        biggest_bar = get_biggest_bar(data_from_json_file)
-        smallest_bar = get_smallest_bar(data_from_json_file)
-        closest_bar = get_closest_bar(data_from_json_file)
-        name_biggest_bar = biggest_bar['properties']['Attributes']['Name']
-        name_smallest_bar = smallest_bar['properties']['Attributes']['Name']
-        if closest_bar:
-            name_closest_bar = closest_bar['properties']['Attributes']['Name']
-        else:
-            name_closest_bar = 'Бар не найден из-за ошибки ввода координат!'
-        return name_biggest_bar, name_smallest_bar, name_closest_bar
+def bar_name(data_bar):
+    if data_bar:
+        return data_bar['properties']['Attributes']['Name']
     else:
-        return None, None, None
+        return None
 
 
 def print_search_bar(biggest_bar, smallest_bar, closest_bar):
@@ -85,16 +62,22 @@ def print_search_bar(biggest_bar, smallest_bar, closest_bar):
     print('{} {}'.format('Самый близкий к вам бар:', closest_bar))
 
 
-def main(filename):
-    big_bar, small_bar, closest_bar = search_name_bar(filename)
-    if big_bar and small_bar and closest_bar:
-        print_search_bar(big_bar, small_bar, closest_bar)
-
-
 if __name__ == '__main__':
     try:
-        filename = sys.argv[1]
+       # filename = sys.argv[1]
+        filename = 'bars.json'
+        data_from_json_file = load_data(filename)
+        info_bars = data_from_json_file['features']
     except IndexError:
         print('Ошибка: Вы не добавили файл JSON!')
+    except FileNotFoundError:
+        print('Ошибка: Данный файл не существует!')
+    except json.decoder.JSONDecodeError:
+        print('Ошибка: Расширение файла не JSON!')
     else:
-        main(filename)
+        name_biggest_bar = bar_name(get_biggest_bar(info_bars))
+        name_smallest_bar = bar_name(get_smallest_bar(info_bars))
+        name_closest_bar = bar_name(get_closest_bar(info_bars))
+        if not name_closest_bar:
+            name_closest_bar = 'Бар не найден из-за ошибки ввода координат!'
+        print_search_bar(name_biggest_bar, name_smallest_bar, name_closest_bar)
