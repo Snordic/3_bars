@@ -21,11 +21,10 @@ def get_biggest_bar(data_from_file):
 
 
 def get_closest_bar(data_from_file, longitude, latitude):
-    return min(data_from_file,
-               key=lambda x: (calculate_distance(
-                   longitude,
-                   latitude,
-                   *x['geometry']['coordinates']))
+    return min(data_from_file, key=lambda x: (calculate_distance(
+        longitude,
+        latitude,
+        *x['geometry']['coordinates']))
                )
 
 
@@ -47,26 +46,28 @@ def print_bar_name(bar_discript, bar):
     print('{} {}'.format(bar_discript, bar['properties']['Attributes']['Name']))
 
 
+def search_bar(data_bars, coordinate):
+    print_bar_name('Самый большой бар:', get_biggest_bar(data_bars))
+    print_bar_name('Самый маленький бар:', get_smallest_bar(data_bars))
+    if user_coordinate:
+        print_bar_name('Самый близкий бар:',
+                       get_closest_bar(data_bars, *coordinate))
+    else:
+        print('Самый близкий бар не был найден из-за'
+              'ошибки ввода координат')
+
+
 if __name__ == '__main__':
     try:
         filename = sys.argv[1]
         data_from_json_file = load_data(filename)
         info_bars = data_from_json_file['features']
+        user_coordinate = get_user_coordinate()
+        search_bar(info_bars, user_coordinate)
     except IndexError:
         print('Ошибка: Вы не добавили файл JSON!')
     except FileNotFoundError:
         print('Ошибка: Данный файл не существует!')
     except json.decoder.JSONDecodeError:
         print('Ошибка: Расширение файла не JSON!')
-    else:
-        user_coordinate = get_user_coordinate()
-        print_bar_name('Самый большой бар:',
-                       get_biggest_bar(info_bars))
-        print_bar_name('Самый маленький бар:',
-                       get_smallest_bar(info_bars))
-        if user_coordinate:
-            print_bar_name('Самый близкий бар:',
-                           get_closest_bar(info_bars, *user_coordinate))
-        else:
-            print('Самый близкий бар не был найден из-за'
-                  'ошибки ввода координат')
+
