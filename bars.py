@@ -22,10 +22,9 @@ def get_biggest_bar(data_from_file):
 
 def get_closest_bar(data_from_file, longitude, latitude):
     return min(data_from_file,
-               key=lambda x: (calculate_distance(
-                   longitude,
-                   latitude,
-                   *x['geometry']['coordinates'])))
+               key=lambda x: (calculate_distance(longitude,
+                                                 latitude,
+                                                 *x['geometry']['coordinates'])))
 
 
 def calculate_distance(x_coord_1, y_coord_1, x_coord_2, y_coord_2):
