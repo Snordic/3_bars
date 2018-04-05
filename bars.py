@@ -25,8 +25,7 @@ def get_closest_bar(data_from_file, longitude, latitude):
                key=lambda x: (calculate_distance(
                    longitude,
                    latitude,
-                   *x['geometry']['coordinates']))
-               )
+                   *x['geometry']['coordinates'])))
 
 
 def calculate_distance(x_coord_1, y_coord_1, x_coord_2, y_coord_2):
@@ -49,7 +48,7 @@ def print_bar_name(bar_discript, bar):
 
 if __name__ == '__main__':
     try:
-        data_from_json_file = load_data('bars.json')['features']
+        data_from_json_file = load_data(sys.argv[1])['features']
         user_coordinate = get_user_coordinate()
         biggest_bar = get_biggest_bar(data_from_json_file)
         smallest_bar = get_smallest_bar(data_from_json_file)
@@ -57,10 +56,8 @@ if __name__ == '__main__':
         print_bar_name('Большой бар: ', biggest_bar)
         print_bar_name('Маленький бар: ', smallest_bar)
         print_bar_name('Ближайщий бар: ', closest_bar)
-    except IndexError:
-        print('Ошибка: Вы не добавили файл JSON!')
-    except FileNotFoundError:
-        print('Ошибка: Данный файл не существует!')
+    except (FileNotFoundError, IndexError):
+        print('Ошибка: Вы не добавили файл!')
     except json.decoder.JSONDecodeError:
         print('Ошибка: Расширение файла не JSON!')
     except ValueError:
