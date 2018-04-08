@@ -21,10 +21,15 @@ def get_biggest_bar(data_from_file):
 
 
 def get_closest_bar(data_from_file, longitude, latitude):
-    return min(data_from_file,
-               key=lambda x: (calculate_distance(longitude,
-                                                 latitude,
-                                                 *x['geometry']['coordinates'])))
+    return min(
+        data_from_file,
+        key=lambda x:
+        calculate_distance(
+            longitude,
+            latitude,
+            *x['geometry']['coordinates']
+        )
+    )
 
 
 def calculate_distance(x_coord_1, y_coord_1, x_coord_2, y_coord_2):
@@ -38,27 +43,27 @@ def get_user_coordinate():
         coordinate_x, coordinate_y = float(x), float(y)
         return coordinate_x, coordinate_y
     except ValueError:
-        raise ValueError
+        return None
 
 
-def print_bar_name(bar_discript, bar):
-    print('{} {}'.format(bar_discript, bar['properties']['Attributes']['Name']))
+def print_bar_name(bar_description, bar):
+    print('{} {}'.format(bar_description, bar['properties']['Attributes']['Name']))
 
 
 if __name__ == '__main__':
     try:
         data_from_json_file = load_data(sys.argv[1])['features']
-        user_coordinate = get_user_coordinate()
         biggest_bar = get_biggest_bar(data_from_json_file)
         smallest_bar = get_smallest_bar(data_from_json_file)
-        closest_bar = get_closest_bar(data_from_json_file, *user_coordinate)
         print_bar_name('Большой бар: ', biggest_bar)
         print_bar_name('Маленький бар: ', smallest_bar)
-        print_bar_name('Ближайщий бар: ', closest_bar)
-    except (FileNotFoundError, IndexError):
+        user_coordinate = get_user_coordinate()
+        if user_coordinate:
+            closest_bar = get_closest_bar(data_from_json_file, *user_coordinate)
+            print_bar_name('Ближайщий бар: ', closest_bar)
+    except (IndexError, FileNotFoundError):
         print('Ошибка: Вы не добавили файл!')
     except json.decoder.JSONDecodeError:
         print('Ошибка: Расширение файла не JSON!')
-    except ValueError:
-        print('Ошибка ввода координат')
+
 
